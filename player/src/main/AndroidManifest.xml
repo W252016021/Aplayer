@@ -12,7 +12,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="Aplayer播放器"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensorLandscape"
             android:theme="@style/AppThemeFullScreen" />
     </application>
 </manifest>

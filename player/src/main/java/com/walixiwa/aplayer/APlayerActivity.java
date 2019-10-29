@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ import com.walixiwa.player.R;
 import java.lang.ref.WeakReference;
 
 import me.jessyan.autosize.AutoSize;
+import me.jessyan.autosize.AutoSizeCompat;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -85,7 +87,23 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
 
     private int position = 0;
 
+/*    @Override
+    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
+        return super.onCreateView(parent, name, context, attrs);
+    }
 
+    @Override
+    public View onCreateView(String name, Context context, AttributeSet attrs) {
+        return super.onCreateView(name, context, attrs);
+    }*/
+
+    @Override
+    public Resources getResources() {
+        //需要升级到 v1.1.2 及以上版本才能使用 AutoSizeCompat
+        AutoSizeCompat.autoConvertDensityOfGlobal(super.getResources());//如果没有自定义需求用这个方法
+        AutoSizeCompat.autoConvertDensity(super.getResources(), 420, false);//如果有自定义需求就用这个方法
+        return super.getResources();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -646,7 +664,7 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         this.width = displayMetrics.widthPixels;
         this.height = displayMetrics.heightPixels;
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            AutoSize.autoConvertDensityOfGlobal(this);
+            //AutoSize.autoConvertDensityOfGlobal(this);
         }
     }
 }
