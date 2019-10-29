@@ -86,7 +86,7 @@ public class Thumbnailer {
     }
 
 
-    public void saveBitmapToLocal(String fileName, Bitmap bitmap) {
+    private void saveBitmapToLocal(String fileName, Bitmap bitmap) {
         try {
             File filePath = new File(bitMapSavePath + fileName);
             if (filePath.exists()) {

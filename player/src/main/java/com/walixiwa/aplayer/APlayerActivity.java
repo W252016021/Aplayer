@@ -1,5 +1,6 @@
 package com.walixiwa.aplayer;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -10,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -29,6 +31,8 @@ import com.walixiwa.aplayer.tools.PositionManager;
 import com.walixiwa.player.R;
 
 import java.lang.ref.WeakReference;
+
+import me.jessyan.autosize.AutoSize;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -81,6 +85,7 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
 
     private int position = 0;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,7 +101,7 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         showToast = intent.getBooleanExtra("showToast", false);
         position = intent.getIntExtra("position", 0);
         aPlayer.open(url);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);    /* 强制为横屏 */
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);    /* 强制为横屏 */
     }
 
 
@@ -640,5 +645,8 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         this.width = displayMetrics.widthPixels;
         this.height = displayMetrics.heightPixels;
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            AutoSize.autoConvertDensityOfGlobal(this);
+        }
     }
 }

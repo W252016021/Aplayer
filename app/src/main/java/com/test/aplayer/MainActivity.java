@@ -25,8 +25,8 @@ public class MainActivity extends AppCompatActivity {
         src_over = findViewById(R.id.src_over);
         findViewById(R.id.start).setOnClickListener(v -> {
 
-            //new APlayer(MainActivity.this).setTitle("测试视频").setUrl("/storage/emulated/0/Pictures/ydcs.mkv").setRequestCode(201).start();
-            Log.e("info", "bitmap: start" );
+            new APlayer(MainActivity.this).setTitle("测试视频").setUrl("/storage/emulated/0/Pictures/ydcs.mkv").setRequestCode(201).start();
+           /* Log.e("info", "bitmap: start" );
             new Thumbnailer()
                     .with(this,"/storage/emulated/0/Pictures/ydcs.mkv")
                     .setCount(100)
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
                     .setOnInfoParseFinishListener(list -> {
                         Glide.with(this).load(list.getUri()).into(src_over);
                     })
-                    .start();
+                    .start();*/
         });
     }
 
