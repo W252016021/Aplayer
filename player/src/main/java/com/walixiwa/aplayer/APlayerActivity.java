@@ -241,7 +241,6 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         });
 
         aPlayer.setOnBufferListener(i -> {
-            Log.e("info", "onBuffer:" + i);
             int visibility = (i == 100) ? View.INVISIBLE : VISIBLE;
             mLlCaching.setVisibility(visibility);
             String strProgress = "缓冲: " + i + "%";
