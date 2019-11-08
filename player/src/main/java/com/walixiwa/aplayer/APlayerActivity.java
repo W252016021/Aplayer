@@ -234,7 +234,7 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
                     break;
                 case APlayerAndroid.PlayCompleteRet.PLAYRE_RESULT_CREATEGRAPHERROR:
                     if (showToast) {
-                        Toast.makeText(APlayerActivity.this, "Create GRAPH Error!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(APlayerActivity.this, "图形解码失败!", Toast.LENGTH_LONG).show();
                     }
                     break;
             }
