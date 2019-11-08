@@ -25,7 +25,11 @@ public class MainActivity extends AppCompatActivity {
         src_over = findViewById(R.id.src_over);
         findViewById(R.id.start).setOnClickListener(v -> {
 
-            new APlayer(MainActivity.this).setTitle("测试视频").setUrl("/storage/emulated/0/Pictures/ydcs.mkv").setRequestCode(201).start();
+            new APlayer(MainActivity.this)
+                    .setTitle("测试视频")
+                    .setUrl("http://192.168.0.108:2333/media/%E5%86%85%E5%B5%8C%E5%AD%97%E5%B9%95%E6%B5%8B%E8%AF%95.mkv")
+                    .setRequestCode(201)
+                    .start();
            /* Log.e("info", "bitmap: start" );
             new Thumbnailer()
                     .with(this,"/storage/emulated/0/Pictures/ydcs.mkv")

@@ -1,6 +1,5 @@
 package com.walixiwa.aplayer;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -12,7 +11,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -33,7 +31,6 @@ import com.walixiwa.player.R;
 
 import java.lang.ref.WeakReference;
 
-import me.jessyan.autosize.AutoSize;
 import me.jessyan.autosize.AutoSizeCompat;
 
 import static android.view.View.GONE;
@@ -42,17 +39,18 @@ import static android.view.View.VISIBLE;
 public class APlayerActivity extends AppCompatActivity implements View.OnClickListener {
     private APlayerAndroid aPlayer = null;
     private SeekBar seekBar;
-    private TextView tv_position;
-    private TextView tv_duration;
-    private TextView tv_info;
-    private ImageView iv_play;
-    private TextView tv_title;
-    private LinearLayout header_bar;
-    private LinearLayout ctrl_bar;
+    private TextView mTvPosition;
+    private TextView mTvDuration;
+    private TextView mTvInfo;
+    private ImageView mIvPlay;
+    private TextView mTvTitle;
+    private LinearLayout mLlHeaderBar;
+    private LinearLayout mLlCtrlBar;
+    private TextView mTvSubTitle;
+    private LinearLayout mLlCaching;
+    private ImageView mIvLock;
+    private ImageView mIvRotate;
 
-    private LinearLayout caching;
-    private ImageView iv_lock;
-    private ImageView iv_rotate;
     private Handler mainUIHandler;
     private boolean mIsNeedUpdateUIProgress = false;        /* 标志位，是否更新UI */
     private boolean mIsTouchingSeekBar = false;        /* 标志位,是否在滑动进度 */
@@ -104,6 +102,7 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         AutoSizeCompat.autoConvertDensity(super.getResources(), 420, false);//如果有自定义需求就用这个方法
         return super.getResources();
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,7 +112,7 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         hideBottomUIMenu();
         Intent intent = getIntent();
         resultCode = getIntent().getIntExtra("resultCode", -1);
-        tv_title.setText(intent.getStringExtra("title"));
+        mTvTitle.setText(intent.getStringExtra("title"));
         url = intent.getStringExtra("url");
         isLive = intent.getBooleanExtra("isLive", false);
         showToast = intent.getBooleanExtra("showToast", false);
@@ -125,17 +124,20 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
 
     private void initAPlayer() {
         SurfaceView holderView = findViewById(R.id.holderView);
-        header_bar = findViewById(R.id.header_bar);
-        ctrl_bar = findViewById(R.id.ctrl_bar);
-        caching = findViewById(R.id.caching);
-        iv_play = findViewById(R.id.v_play);
-        iv_play.setOnClickListener(this);
+        mLlHeaderBar = findViewById(R.id.header_bar);
+        mLlCtrlBar = findViewById(R.id.ctrl_bar);
+        mTvSubTitle = findViewById(R.id.tv_sub_title);
+        mLlCaching = findViewById(R.id.caching);
+        mIvPlay = findViewById(R.id.v_play);
+        mIvPlay.setOnClickListener(this);
         findViewById(R.id.v_back).setOnClickListener(this);
-        iv_rotate = findViewById(R.id.v_rotate);
-        iv_rotate.setOnClickListener(this);
-        iv_lock = findViewById(R.id.v_player_lock);
-        iv_lock.setOnClickListener(this);
+        mIvRotate = findViewById(R.id.v_rotate);
+        mIvRotate.setOnClickListener(this);
+        mIvLock = findViewById(R.id.v_player_lock);
+        mIvLock.setOnClickListener(this);
         cachingProgressHint = findViewById(R.id.loading_text);
+
+        //初始化滑动手势配置
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         this.width = displayMetrics.widthPixels;
@@ -158,17 +160,17 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         this.pressedBrightness = ((int) (f * 100.0F));
 
         seekBar = findViewById(R.id.seekbar);
-        tv_position = findViewById(R.id.tv_position);
-        tv_duration = findViewById(R.id.tv_duration);
-        tv_info = findViewById(R.id.tv_info);
-        tv_title = findViewById(R.id.v_title);
+        mTvPosition = findViewById(R.id.tv_position);
+        mTvDuration = findViewById(R.id.tv_duration);
+        mTvInfo = findViewById(R.id.tv_info);
+        mTvTitle = findViewById(R.id.v_title);
         aPlayer = new APlayerAndroid();
         aPlayer.setView(holderView);
         aPlayer.setOnOpenCompleteListener(b -> {
             if (b) {
                 if (position != 0) {
                     aPlayer.setPosition(position);
-                }else{
+                } else {
                     if (!isLive) {
                         int position = PositionManager.getInstance(this).getPosition(url);
                         if (position > 0) {
@@ -178,19 +180,21 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 aPlayer.play();
             } else {
-                caching.setVisibility(GONE);
+                mLlCaching.setVisibility(GONE);
             }
         });
+
         aPlayer.setOnOpenProgressListener(new APlayerAndroid.OnOpenProgressListener() {
             @Override
             public void onOpenProgress(int progress) {
                 super.onOpenProgress(progress);
                 int visibility = (progress == 100) ? View.INVISIBLE : VISIBLE;
-                caching.setVisibility(visibility);
+                mLlCaching.setVisibility(visibility);
                 String buff = "正在打开视频：" + progress + "%";
                 cachingProgressHint.setText(buff);
             }
         });
+
         aPlayer.setOnPlayCompleteListener(s -> {
             switch (s) {
                 case APlayerAndroid.PlayCompleteRet.PLAYRE_RESULT_COMPLETE:
@@ -235,29 +239,27 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
                     break;
             }
         });
+
         aPlayer.setOnBufferListener(i -> {
             Log.e("info", "onBuffer:" + i);
             int visibility = (i == 100) ? View.INVISIBLE : VISIBLE;
-            caching.setVisibility(visibility);
+            mLlCaching.setVisibility(visibility);
             String strProgress = "缓冲: " + i + "%";
             cachingProgressHint.setText(strProgress);
         });
+
         aPlayer.setOnPlayStateChangeListener((i, i1) -> {
             switch (i) {
                 case APlayerAndroid.PlayerState.APLAYER_CLOSEING:
-                    caching.setVisibility(VISIBLE);
+                    mLlCaching.setVisibility(VISIBLE);
                     cachingProgressHint.setText("正在关闭...");
                     break;
-               /* case APlayerAndroid.PlayerState.APLAYER_OPENING:
-                    caching.setVisibility(VISIBLE);
-                    cachingProgressHint.setText("正在打开视频...");
-                    break;*/
                 case APlayerAndroid.PlayerState.APLAYER_PAUSED:
                 case APlayerAndroid.PlayerState.APLAYER_PLAYING:
-                    caching.setVisibility(GONE);
+                    mLlCaching.setVisibility(GONE);
                     break;
                 case APlayerAndroid.PlayerState.APLAYER_PAUSING:
-                    caching.setVisibility(VISIBLE);
+                    mLlCaching.setVisibility(VISIBLE);
                     cachingProgressHint.setText("正在暂停...");
                     break;
                 case APlayerAndroid.PlayerState.APLAYER_PLAY:
@@ -266,33 +268,38 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
                     break;
             }
             if (i == APlayerAndroid.PlayerState.APLAYER_PLAYING) {
-                iv_play.setImageResource(R.drawable.v_play_pause);
+                mIvPlay.setImageResource(R.drawable.v_play_pause);
                 startUIUpdateThread();
             } else {
-                iv_play.setImageResource(R.drawable.v_play_arrow);
+                mIvPlay.setImageResource(R.drawable.v_play_arrow);
                 stopUIUpdateThread();
             }
             Log.e("info", "preState:" + i1 + " >> State:" + i);
         });
+
+        aPlayer.setOnShowSubtitleListener(s -> mTvSubTitle.setText(s));
+
+        aPlayer.setOnSystemPlayerFailListener(() -> {
+            aPlayer.setConfig(APlayerAndroid.CONFIGID.HW_DECODER_USE, "1");
+        });
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (null == aPlayer || !fromUser) {
                     return;
                 }
-
                 mIsTouchingSeekBar = true;
                 userSeekPlayProgress(progress, seekBar.getMax());
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                /* Log.e(DEBUG_TAG, "onStartTrackingTouch"); */
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                tv_info.setVisibility(GONE);
+                mTvInfo.setVisibility(GONE);
                 mIsTouchingSeekBar = false;
                 startUIUpdateThread();
             }
@@ -305,10 +312,10 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         if (v.getId() == R.id.v_play) {
             if (aPlayer != null) {
                 if (aPlayer.getState() == APlayerAndroid.PlayerState.APLAYER_PLAYING) {
-                    iv_play.setImageResource(R.drawable.v_play_arrow);
+                    mIvPlay.setImageResource(R.drawable.v_play_arrow);
                     aPlayer.pause();
                 } else {
-                    iv_play.setImageResource(R.drawable.v_play_pause);
+                    mIvPlay.setImageResource(R.drawable.v_play_pause);
                     aPlayer.play();
                 }
             }
@@ -328,9 +335,9 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
             if (!locker) {
                 locker = true;
                 hideCtrlBar();
-                iv_lock.setImageResource(R.drawable.v_player_locked);
+                mIvLock.setImageResource(R.drawable.v_player_locked);
             } else {
-                iv_lock.setImageResource(R.drawable.v_player_unlocked);
+                mIvLock.setImageResource(R.drawable.v_player_unlocked);
                 locker = false;
                 showBars();
             }
@@ -339,17 +346,17 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
 
     private void hideCtrlBar() {
         Animation animation = AnimationUtils.loadAnimation(APlayerActivity.this, R.anim.anim_top_out);
-        header_bar.startAnimation(animation);
-        header_bar.setVisibility(GONE);
+        mLlHeaderBar.startAnimation(animation);
+        mLlHeaderBar.setVisibility(GONE);
         Animation animation2 = AnimationUtils.loadAnimation(APlayerActivity.this, R.anim.anim_bottom_out);
-        ctrl_bar.startAnimation(animation2);
-        ctrl_bar.setVisibility(GONE);
+        mLlCtrlBar.startAnimation(animation2);
+        mLlCtrlBar.setVisibility(GONE);
         Animation animation3 = AnimationUtils.loadAnimation(APlayerActivity.this, R.anim.anim_left_out);
-        iv_lock.startAnimation(animation3);
-        iv_lock.setVisibility(GONE);
+        mIvLock.startAnimation(animation3);
+        mIvLock.setVisibility(GONE);
 
-        iv_rotate.startAnimation(animation2);
-        iv_rotate.setVisibility(GONE);
+        mIvRotate.startAnimation(animation2);
+        mIvRotate.setVisibility(GONE);
     }
 
     static class MyHandler extends Handler {
@@ -363,8 +370,8 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         public void handleMessage(Message msg) {
             APlayerActivity activity = mActivity.get();
             if (msg.what == 1) {
-                activity.tv_duration.setText(updateTextViewWithTimeFormat(msg.arg2));
-                activity.tv_position.setText(updateTextViewWithTimeFormat(msg.arg1));
+                activity.mTvDuration.setText(updateTextViewWithTimeFormat(msg.arg2));
+                activity.mTvPosition.setText(updateTextViewWithTimeFormat(msg.arg1));
                 if (msg.arg1 > 0 && msg.arg2 >= 0) {
                     activity.seekBar.setMax(msg.arg2);
                     activity.seekBar.setProgress(msg.arg1);
@@ -441,8 +448,8 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         mIsTouchingSeekBar = true;
         stopUIUpdateThread();
         seekBar.setProgress(seekPositionMs);
-        tv_info.setText(String.format("%s/%s", updateTextViewWithTimeFormat(seekPositionMs), updateTextViewWithTimeFormat(max)));
-        tv_info.setVisibility(VISIBLE);
+        mTvInfo.setText(String.format("%s/%s", updateTextViewWithTimeFormat(seekPositionMs), updateTextViewWithTimeFormat(max)));
+        mTvInfo.setVisibility(VISIBLE);
         aPlayer.setPosition(seekPositionMs * 1000);
     }
 
@@ -464,7 +471,7 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             case MotionEvent.ACTION_UP:
                 new Handler().postDelayed(() -> {
-                    tv_info.setVisibility(GONE);
+                    mTvInfo.setVisibility(GONE);
                     switch (action) {
                         case 2:
                             if (aPlayer.getDuration() > 5 && !locker) {
@@ -506,8 +513,8 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
                             if (this.currentMovePosition > this.totalPosition) {
                                 this.currentMovePosition = this.totalPosition;
                             }
-                            this.tv_info.setVisibility(VISIBLE);
-                            this.tv_info.setText(String.format("%s/%s", updateTextViewWithTimeFormat(this.currentMovePosition), updateTextViewWithTimeFormat(this.totalPosition)));
+                            this.mTvInfo.setVisibility(VISIBLE);
+                            this.mTvInfo.setText(String.format("%s/%s", updateTextViewWithTimeFormat(this.currentMovePosition), updateTextViewWithTimeFormat(this.totalPosition)));
                             break;
                         case 3:
                             float f6 = (y - this.movedY) * 100.0F / this.height;
@@ -519,9 +526,9 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
                             if (this.currentBrightness < 7) {
                                 this.currentBrightness = 7;
                             }
-                            this.tv_info.setVisibility(VISIBLE);
+                            this.mTvInfo.setVisibility(VISIBLE);
                             int j = (this.currentBrightness - 7) * 100 / 93;
-                            this.tv_info.setText("亮度：" + j + "%");
+                            this.mTvInfo.setText("亮度：" + j + "%");
 
                             setBrightness(this.currentBrightness);
                             break;
@@ -535,9 +542,9 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
                             if (currentVolumeM < 0) {
                                 currentVolumeM = 0;
                             }
-                            this.tv_info.setVisibility(VISIBLE);
+                            this.mTvInfo.setVisibility(VISIBLE);
                             int k = currentVolumeM * 100 / this.maxVolume;
-                            this.tv_info.setText("音量：" + k + "%");
+                            this.mTvInfo.setText("音量：" + k + "%");
                             int m = currentVolumeM / 6;
                             this.audioManager.setStreamVolume(3, m, 0);
                             break;
@@ -552,18 +559,18 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
 
     private void onClickEmptyArea() {
         if (locker) {
-            if (iv_lock.getVisibility() != VISIBLE) {
-                iv_lock.setVisibility(VISIBLE);
+            if (mIvLock.getVisibility() != VISIBLE) {
+                mIvLock.setVisibility(VISIBLE);
                 Animation animation3 = AnimationUtils.loadAnimation(APlayerActivity.this, R.anim.anim_left_in);
-                iv_lock.startAnimation(animation3);
+                mIvLock.startAnimation(animation3);
             } else {
                 Animation animation3 = AnimationUtils.loadAnimation(APlayerActivity.this, R.anim.anim_left_out);
-                iv_lock.startAnimation(animation3);
-                iv_lock.setVisibility(GONE);
+                mIvLock.startAnimation(animation3);
+                mIvLock.setVisibility(GONE);
             }
             return;
         }
-        if (header_bar.getVisibility() == GONE) {
+        if (mLlHeaderBar.getVisibility() == GONE) {
             showBars();
         } else {
             hideBottomUIMenu();
@@ -572,20 +579,20 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void showBars() {
-        header_bar.setVisibility(VISIBLE);
+        mLlHeaderBar.setVisibility(VISIBLE);
         Animation animation = AnimationUtils.loadAnimation(APlayerActivity.this, R.anim.anim_top_in);
-        header_bar.startAnimation(animation);
+        mLlHeaderBar.startAnimation(animation);
 
-        ctrl_bar.setVisibility(VISIBLE);
+        mLlCtrlBar.setVisibility(VISIBLE);
         Animation animation2 = AnimationUtils.loadAnimation(APlayerActivity.this, R.anim.anim_bottom_in);
-        ctrl_bar.startAnimation(animation2);
+        mLlCtrlBar.startAnimation(animation2);
 
-        iv_lock.setVisibility(VISIBLE);
+        mIvLock.setVisibility(VISIBLE);
         Animation animation3 = AnimationUtils.loadAnimation(APlayerActivity.this, R.anim.anim_left_in);
-        iv_lock.startAnimation(animation3);
+        mIvLock.startAnimation(animation3);
 
-        iv_rotate.setVisibility(VISIBLE);
-        iv_rotate.startAnimation(animation2);
+        mIvRotate.setVisibility(VISIBLE);
+        mIvRotate.startAnimation(animation2);
     }
 
     public void setBrightness(int paramInt) {
