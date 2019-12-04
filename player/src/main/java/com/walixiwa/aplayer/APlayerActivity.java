@@ -47,6 +47,7 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
     private LinearLayout mLlHeaderBar;
     private LinearLayout mLlCtrlBar;
     private TextView mTvSubTitle;
+    private TextView mTvSpeed;
     private LinearLayout mLlCaching;
     private ImageView mIvLock;
     private ImageView mIvRotate;
@@ -137,6 +138,7 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         mIvLock.setOnClickListener(this);
         cachingProgressHint = findViewById(R.id.loading_text);
 
+        mTvSpeed = findViewById(R.id.tv_speed);
         //初始化滑动手势配置
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -303,7 +305,46 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
                 startUIUpdateThread();
             }
         });
+
+        mTvSpeed.setOnClickListener(v -> {
+            if (currentSpeedIndex == 6) {
+                currentSpeedIndex = 0;
+            } else {
+                currentSpeedIndex += 1;
+            }
+            aPlayer.setConfig(APlayerAndroid.CONFIGID.PLAY_SPEED, String.valueOf(getSpeedFromIndex(currentSpeedIndex)));
+
+        });
         mainUIHandler = new MyHandler(this);
+    }
+
+    private int currentSpeedIndex = 2;
+
+    private int getSpeedFromIndex(int index) {
+        int ret = 0;
+        if (index == 0) {
+            ret = 50;
+            mTvSpeed.setText("0.5倍速");
+        } else if (index == 1) {
+            ret = 75;
+            mTvSpeed.setText("0.75倍速");
+        } else if (index == 2) {
+            ret = 100;
+            mTvSpeed.setText("1.0倍速");
+        } else if (index == 3) {
+            ret = 125;
+            mTvSpeed.setText("1.25倍速");
+        } else if (index == 4) {
+            ret = 150;
+            mTvSpeed.setText("1.5倍速");
+        } else if (index == 5) {
+            ret = 175;
+            mTvSpeed.setText("1.75倍速");
+        } else if (index == 6) {
+            ret = 200;
+            mTvSpeed.setText("2.0倍速");
+        }
+        return ret;
     }
 
     @Override
