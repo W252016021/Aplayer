@@ -20,7 +20,7 @@ dependencies {
 ##### 调用播放:
 
 ```java
-new FuckPlayer(this).setTitle(name).setUrl(link).setResquestCode(201).start();//201用于回调播放完成事件，可空
+new FuckPlayer(this).setTitle(name).setUrl(link).setCookies(cookies).setResquestCode(201).start();//201用于回调播放完成事件，可空
 
 @Override
 protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

@@ -8,6 +8,7 @@ import com.walixiwa.aplayer.APlayerActivity;
 public class APlayer {
     private String title = "";
     private String url = "";
+    private String cookies = "";
     private Activity activity;
     private boolean isLive = false;
     private int requestCode = -1;
@@ -25,6 +26,11 @@ public class APlayer {
 
     public APlayer setUrl(String url) {
         this.url = url;
+        return this;
+    }
+
+    public APlayer setCookies(String cookies) {
+        this.cookies = cookies;
         return this;
     }
 
@@ -47,6 +53,7 @@ public class APlayer {
         Intent intent = new Intent(activity, APlayerActivity.class);
         intent.putExtra("title", title);
         intent.putExtra("url", url);
+        intent.putExtra("cookies", cookies);
         intent.putExtra("isLive", isLive);
         intent.putExtra("position", position);
         if (requestCode == -1) {

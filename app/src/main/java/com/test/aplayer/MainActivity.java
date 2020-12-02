@@ -27,7 +27,8 @@ public class MainActivity extends AppCompatActivity {
 
             new APlayer(MainActivity.this)
                     .setTitle("测试视频")
-                    .setUrl("http://192.168.0.108:2333/media/%E5%86%85%E5%B5%8C%E5%AD%97%E5%B9%95%E6%B5%8B%E8%AF%95.mkv")
+                    .setUrl("http://vfx.mtime.cn/Video/2019/03/12/mp4/190312143927981075.mp4")
+                    .setCookies("Cookie=3dd87828")
                     .setRequestCode(201)
                     .start();
            /* Log.e("info", "bitmap: start" );
