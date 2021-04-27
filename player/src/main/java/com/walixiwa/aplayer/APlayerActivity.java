@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -78,6 +78,8 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
 
     private String url = "";
 
+    private String cookies = "";
+
     private boolean isLive;
 
     private int resultCode = -1;
@@ -114,10 +116,12 @@ public class APlayerActivity extends AppCompatActivity implements View.OnClickLi
         Intent intent = getIntent();
         resultCode = getIntent().getIntExtra("resultCode", -1);
         mTvTitle.setText(intent.getStringExtra("title"));
+        cookies = intent.getStringExtra("cookies");
         url = intent.getStringExtra("url");
         isLive = intent.getBooleanExtra("isLive", false);
         showToast = intent.getBooleanExtra("showToast", false);
         position = intent.getIntExtra("position", 0);
+        aPlayer.setConfig(1105,cookies);
         aPlayer.open(url);
         //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);    /* 强制为横屏 */
     }
